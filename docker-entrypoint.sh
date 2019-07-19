@@ -23,7 +23,7 @@ export CA_CERT=$(base64 < "./ca.key.pem" | tr -d '\n')
 export TLS_KEY=$(base64 < "./tiller.key.pem" | tr -d '\n')
 export TLS_CERT=$(base64 < "./tiller.cert.pem" | tr -d '\n')
 
-kubectl get secrets -n kube-system tiller-secret -o json |
+kubectl get secrets -n kube-system tiller-secret -o json | \
   jq '.data["ca.crt"] |= env.CA_CERT' | \
   jq '.data["tls.key"] |= env.TLS_KEY' | \
   jq '.data["tls.crt"] |= env.TLS_CERT' | \ 
