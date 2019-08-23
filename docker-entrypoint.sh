@@ -18,13 +18,14 @@ openssl genrsa -out ./helm.key.pem 4096
 openssl req -key helm.key.pem -new -sha256 -out helm.csr.pem -subj "/CN=tiller-user"
 openssl x509 -req -CA ca.cert.pem -CAkey ca.key.pem -CAcreateserial -in helm.csr.pem -out helm.cert.pem  -days 365
 
-
 export CA_CERT=$(base64 < "./ca.cert.pem" | tr -d '\n')
 export TLS_KEY=$(base64 < "./tiller.key.pem" | tr -d '\n')
 export TLS_CERT=$(base64 < "./tiller.cert.pem" | tr -d '\n')
 
-kubectl get secrets -n kube-system tiller-secret -o json | \
-  jq '.data["ca.crt"] |= env.CA_CERT' | \
-  jq '.data["tls.key"] |= env.TLS_KEY' | \
-  jq '.data["tls.crt"] |= env.TLS_CERT' | \
-  kubectl apply -f -
+if kubectl get secrets -n kube-system | grep tiller-secret; then
+  kubectl get secrets -n kube-system tiller-secret -o json | \
+    jq '.data["ca.crt"] |= env.CA_CERT' | \
+    jq '.data["tls.key"] |= env.TLS_KEY' | \
+    jq '.data["tls.crt"] |= env.TLS_CERT' | \
+    kubectl apply -f -
+fi
